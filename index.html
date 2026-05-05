@@ -176,22 +176,31 @@ audio {
 </div>
 
 <script>
-function generate() {
+async function generate() {
   const text = document.getElementById("text").value;
-  const speed = document.getElementById("speed").value;
 
   if (!text) {
-    alert("Text likho pehle");
+    alert("Text likho");
     return;
   }
 
-  const speech = new SpeechSynthesisUtterance(text);
-  speech.lang = "hi-IN";
-  speech.rate = speed;
+  const res = await fetch("/api/tts", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ text })
+  });
 
-  speechSynthesis.speak(speech);
+  const data = await res.json();
 
-  document.getElementById("audioBox").style.display = "block";
+  if (data.audioContent) {
+    const audio = document.getElementById("audio");
+    audio.src = "data:audio/mp3;base64," + data.audioContent;
+    document.getElementById("audioBox").style.display = "block";
+  } else {
+    alert("Error generating voice");
+  }
 }
 </script>
 
